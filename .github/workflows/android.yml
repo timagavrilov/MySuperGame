@@ -4,19 +4,22 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build with Buildozer
-        uses: ArtemSBulgakov/buildozer-action@v1
-        with:
-          command: buildozer android debug
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libtool pkg-config autoconf automake build-essential libssl-dev libffi-dev libgmp-dev zlib1g-dev libncurses5-dev libncursesw5-dev libsqlite3-dev tk-dev libgdbm-dev libdb-dev libpcap-dev xz-utils libexpat1-dev liblzma-dev libffi-dev python3-dev
+          pip3 install --user --upgrade buildozer cython virtualenv
+
+      - name: Build APK
+        run: |
+          export PATH=$PATH:$HOME/.local/bin
+          yes y | buildozer -v android debug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
